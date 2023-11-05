@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from helpers.send_email import send_email
 
 import cx_Oracle
 import os
@@ -120,6 +121,40 @@ def upload_documents():
         connection.close()
         
         return jsonify({ 'error': False, 'message': 'Documentos ingresados correctamente. Le notificaremos a uno de nuestros administradores para que los verifique.' })
+    except cx_Oracle.DatabaseError as e:
+        error, = e.args
+        return jsonify({ 'error': True, 'message': error.message })
+
+@drivers.route('/verificate-documents', methods=["PUT"])
+def verificate_documents_driver():
+    try:
+        connection = cx_Oracle.connect(
+            user='system',
+            password='123456',
+            dsn='localhost:1521/XEPDB1',
+            encoding='UTF-8'
+        )
+        
+        cursor = connection.cursor()
+        
+        cedule = request.form.get('cedule')
+        destination = request.form.get('destination')
+        body = request.form.get("body")
+        subject = request.form.get("subject")
+        verified_documents = request.form.get("verified_documents")
+        
+        send_email(destination, body, subject)
+        
+        if verified_documents == 'true':
+            cursor.execute(f"UPDATE AVI_DRIVERS SET VERIFIED_DOCUMENTS = 1 WHERE CEDULE = {cedule}")
+            connection.commit()
+        
+            cursor.close()
+            connection.close()
+            
+            return jsonify({ 'error': False, 'message': 'Conductor verificado correctamente' })
+        else:
+            return jsonify({ 'error': False, 'message': '' })
     except cx_Oracle.DatabaseError as e:
         error, = e.args
         return jsonify({ 'error': True, 'message': error.message })
