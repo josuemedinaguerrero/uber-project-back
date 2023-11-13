@@ -2,8 +2,11 @@ from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from helpers.send_email import send_email
+from helpers.format import format_fields
+from db.connection import connection_db
 
 import cx_Oracle
+import hashlib
 import os
 
 drivers = Blueprint('drivers', __name__)
@@ -11,29 +14,15 @@ drivers = Blueprint('drivers', __name__)
 @drivers.route("/drivers")
 def get_drivers():
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
-        
-        cursor = connection.cursor()
+        connection, cursor = connection_db()
         
         cursor.execute("SELECT * FROM AVI_DRIVERS")
         drivers_db = cursor.fetchall()
         
-        column_names = [desc[0] for desc in cursor.description]
+        result = format_fields(drivers_db, cursor)
         
         cursor.close()
         connection.close()
-
-        result = []
-        for row in drivers_db:
-            row_dict = {}
-            for i in range(len(row)):
-                row_dict[column_names[i]] = row[i]
-            result.append(row_dict)
 
         return jsonify(result)
     except cx_Oracle.DatabaseError as e:
@@ -43,14 +32,7 @@ def get_drivers():
 @drivers.route('/create-driver', methods=["POST"])
 def create_driver():
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
-        
-        cursor = connection.cursor()
+        connection, cursor = connection_db()
         
         image = request.files['image']
         if image:
@@ -66,7 +48,7 @@ def create_driver():
             'city': request.form.get("city"),
             'email': request.form.get("email"),
             'phone': request.form.get("phone"),
-            'password': birthdate.strftime("%Y-%m-%d"),
+            'password': hashlib.md5(request.form.get('password').encode()).hexdigest(),
             'birthdate': birthdate,
         }
         
@@ -89,12 +71,7 @@ def create_driver():
 @drivers.route("/driver-documents", methods=["PUT"])
 def upload_documents():
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
+        connection, cursor = connection_db()
         
         cedule_file = request.files.get('cedule')
         registration_file = request.files.get('registration')
@@ -112,8 +89,6 @@ def upload_documents():
         registration_file.save(os.path.join('documents', registration_filename))
         license_file.save(os.path.join('documents', license_filename))
         
-        cursor = connection.cursor()
-        
         cursor.execute(f"UPDATE AVI_DRIVERS SET DOCUMENTS = 1 WHERE CEDULE = {cedule}")
         connection.commit()
         
@@ -128,14 +103,7 @@ def upload_documents():
 @drivers.route('/verificate-documents', methods=["PUT"])
 def verificate_documents_driver():
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
-        
-        cursor = connection.cursor()
+        connection, cursor = connection_db()
         
         cedule = request.form.get('cedule')
         destination = request.form.get('destination')
@@ -145,16 +113,13 @@ def verificate_documents_driver():
         
         send_email(destination, body, subject)
         
-        if verified_documents == 'true':
-            cursor.execute(f"UPDATE AVI_DRIVERS SET VERIFIED_DOCUMENTS = 1 WHERE CEDULE = {cedule}")
-            connection.commit()
+        cursor.execute(f"UPDATE AVI_DRIVERS SET VERIFIED_DOCUMENTS = {verified_documents} WHERE CEDULE = {cedule}")
+        connection.commit()
         
-            cursor.close()
-            connection.close()
+        cursor.close()
+        connection.close()
             
-            return jsonify({ 'error': False, 'message': 'Conductor verificado correctamente' })
-        else:
-            return jsonify({ 'error': False, 'message': '' })
+        return jsonify({ 'error': False, 'message': 'Mensaje enviado exitosamente' })
     except cx_Oracle.DatabaseError as e:
         error, = e.args
         return jsonify({ 'error': True, 'message': error.message })

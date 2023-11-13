@@ -17,26 +17,24 @@ def register_user():
         
         cursor = connection.cursor()
         
+        cedule = request.form.get("cedule")
+        
         data = {
-            'cedule': request.form.get("cedule"),
+            'cedule': cedule,
             'password': hashlib.md5(request.form.get('password').encode()).hexdigest(),
             'email': request.form.get("email"),
             'username': request.form.get("username"),
             'rol': request.form.get('rol') if request.form.get('rol') is not None else 1
         }
         
-        print(data)
-        
         cursor.execute("INSERT INTO AVI_USERS (CEDULE, PASSWORD, EMAIL, USERNAME, ROL) VALUES (:cedule, :password, :email, :username, :rol)", data)
-        connection.commit()
-        
-        cursor.execute("INSERT INTO AVI_PROFILES (CEDULE, USER_PROFILE) VALUES (:cedule, :cedule)", data)
         connection.commit()
         
         cursor.close()
         connection.close()
         
-        return jsonify({ 'message': 'Usuario creado exitosamente correctamente' })
+        return jsonify({ 'message': 'Usuario creado exitosamente' })
     except cx_Oracle.DatabaseError as e:
         error, = e.args
+        print(error.message)
         return jsonify({ 'error': True, 'message': error.message })

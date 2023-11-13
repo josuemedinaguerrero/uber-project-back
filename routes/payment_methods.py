@@ -4,7 +4,7 @@ import cx_Oracle
 
 payment_methods = Blueprint('payment_methods', __name__)
 
-@payment_methods.route('/payment_methods')
+@payment_methods.route('/payment-methods')
 def register_user():
     try:
         connection = cx_Oracle.connect(
