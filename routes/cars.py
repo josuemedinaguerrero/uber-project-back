@@ -1,11 +1,23 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, send_file, jsonify
 from helpers.format import format_obj
 from db.connection import connection_db
 
 import cx_Oracle
+import os
 
 cars = Blueprint('cars', __name__)
 
+@cars.route('/car/image/<cedule>')
+def get_image_car(cedule):
+    try:
+        image_path = f"./assets/cars/{cedule}.png"
+        if not os.path.exists(image_path):
+            return send_file(f"./assets/cars/default.png", mimetype='image/png')
+        
+        return send_file(image_path, mimetype='image/png')
+    except Exception as e:
+        return jsonify({ 'error': True, 'message': str(e) })
+    
 @cars.route('/car/<driver>')
 def get_car(driver):
     try:

@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from db.connection import connection_db
 
 import cx_Oracle
 
@@ -7,14 +8,7 @@ profile = Blueprint('profile', __name__)
 @profile.route('/create-profile', methods=["POST"])
 def create_profile():
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
-        
-        cursor = connection.cursor()
+        connection, cursor = connection_db()
         
         cedule = request.form.get("cedule")
         
@@ -32,14 +26,7 @@ def create_profile():
 @profile.route('/profile/<cedule>')
 def get_profile(cedule):
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
-        
-        cursor = connection.cursor()
+        connection, cursor = connection_db()
         
         cursor.execute(f"SELECT * FROM AVI_PROFILES WHERE cedule = {cedule}")
         profile_db = cursor.fetchone()

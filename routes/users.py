@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from db.connection import connection_db
 
 import cx_Oracle
 
@@ -7,14 +8,7 @@ users = Blueprint('users', __name__)
 @users.route('/update-user', methods=["PUT"])
 def register_user():
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
-        
-        cursor = connection.cursor()
+        connection, cursor = connection_db()
         
         data_user = {
             'cedule': request.form.get('CEDULE'),

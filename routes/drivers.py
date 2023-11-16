@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from werkzeug.utils import secure_filename
 from datetime import datetime
 from helpers.send_email import send_email
 from helpers.format import format_fields

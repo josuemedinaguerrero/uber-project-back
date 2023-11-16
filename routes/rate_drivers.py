@@ -30,8 +30,12 @@ def update_rate_driver(cedule):
         cursor.execute(f"SELECT r.rate FROM AVI_RATE_DRIVERS r WHERE DRIVER = {cedule}")
         rate_driver_db = cursor.fetchone()
         
-        new_rate = int((int(rate_driver_db[0]) + int(request.form.get('rate'))) / 2)
-        
+        if rate_driver_db:
+            new_rate = int((int(rate_driver_db[0]) + int(request.form.get('rate'))) / 2)
+            cursor.execute(f"UPDATE AVI_RATE_DRIVERS SET RATE = {new_rate} WHERE DRIVER = '{cedule}'")
+        else:
+            cursor.execute(f"INSERT INTO AVI_RATE_DRIVERS (RATE, DRIVER) VALUES ({int((int(request.form.get('rate')) + 10) / 2)}, '{cedule}')")
+            
         data_review = {
             'id': int(''.join([str(random.randint(0, 9)) for _ in range(15)])),
             'comment_review': request.form.get('comment_review'),
@@ -39,7 +43,6 @@ def update_rate_driver(cedule):
         }
         
         cursor.execute(f"UPDATE AVI_ROUTES SET CALIFICATION = {request.form.get('rate')} WHERE ID = {request.form.get('route_id')}")
-        cursor.execute(f"UPDATE AVI_RATE_DRIVERS SET RATE = {new_rate} WHERE DRIVER = '{cedule}'")
         cursor.execute("INSERT INTO AVI_REVIEWS (ID, COMMENT_REVIEW, ROUTE) VALUES (:id, :comment_review, :route_id)", data_review)
         connection.commit()
         

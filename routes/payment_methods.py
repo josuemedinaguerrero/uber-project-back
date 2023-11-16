@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify
+from db.connection import connection_db
 
 import cx_Oracle
 
@@ -7,14 +8,7 @@ payment_methods = Blueprint('payment_methods', __name__)
 @payment_methods.route('/payment-methods')
 def register_user():
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
-        
-        cursor = connection.cursor()
+        connection, cursor = connection_db()
         
         cursor.execute("SELECT * FROM AVI_PAYMENT_METHODS")
         payment_methods = cursor.fetchall()

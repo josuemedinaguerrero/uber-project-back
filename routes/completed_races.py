@@ -30,6 +30,15 @@ def update_rate_driver(cedule):
         cursor.execute(f"SELECT r.quantity FROM AVI_COMPLETED_RACES r WHERE DRIVER = {cedule}")
         rate_driver_db = cursor.fetchone()
         
+        if not rate_driver_db:
+            cursor.execute(f"INSERT INTO AVI_COMPLETED_RACES (DRIVER, QUANTITY) VALUES ('{cedule}', 1)")
+            connection.commit()
+            
+            cursor.close()
+            connection.close()
+            
+            return jsonify({ 'error': False })
+        
         cursor.execute(f"UPDATE AVI_COMPLETED_RACES SET QUANTITY = {int(int(rate_driver_db[0])) + 1} WHERE DRIVER = '{cedule}'")
         connection.commit()
         

@@ -1,4 +1,4 @@
-from flask import Blueprint, send_from_directory, request, jsonify, make_response
+from flask import Blueprint, send_from_directory, request, jsonify
 from werkzeug.utils import secure_filename
 from db.connection import connection_db
 

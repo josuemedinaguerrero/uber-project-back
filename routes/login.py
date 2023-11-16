@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from db.connection import connection_db
 
 import cx_Oracle
 import hashlib
@@ -8,14 +9,7 @@ login = Blueprint('login', __name__)
 @login.route('/login', methods=["POST"])
 def register_user():
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
-        
-        cursor = connection.cursor()
+        connection, cursor = connection_db()
         
         data = {
             'password': hashlib.md5(request.form.get('password').encode()).hexdigest(),
