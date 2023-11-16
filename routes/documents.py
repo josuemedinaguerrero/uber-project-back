@@ -1,5 +1,6 @@
 from flask import Blueprint, send_from_directory, request, jsonify, make_response
 from werkzeug.utils import secure_filename
+from db.connection import connection_db
 
 import cx_Oracle
 import os
@@ -9,17 +10,14 @@ documents = Blueprint('documents', __name__)
 @documents.route("/driver-documents", methods=["PUT"])
 def upload_documents():
     try:
-        connection = cx_Oracle.connect(
-            user='system',
-            password='123456',
-            dsn='localhost:1521/XEPDB1',
-            encoding='UTF-8'
-        )
+        connection, cursor = connection_db()
         
         cedule_file = request.files.get('cedule')
         registration_file = request.files.get('registration')
         license_file = request.files.get('license')
         cedule = request.form.get("cedule")
+            
+        print(cedule)        
        
         if not cedule_file or not registration_file or not license_file:
             return jsonify({ 'error': True, 'message': 'Todos los archivos son requeridos' })
@@ -32,9 +30,7 @@ def upload_documents():
         registration_file.save(os.path.join('documents', registration_filename))
         license_file.save(os.path.join('documents', license_filename))
         
-        cursor = connection.cursor()
-        
-        cursor.execute(f"UPDATE AVI_DRIVERS SET DOCUMENTS = 1 WHERE CEDULE = {cedule}")
+        cursor.execute(f"UPDATE AVI_DRIVERS SET STATE_DOCUMENTS = 3 WHERE CEDULE = {cedule}")
         connection.commit()
         
         cursor.close()

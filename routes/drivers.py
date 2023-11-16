@@ -7,7 +7,6 @@ from db.connection import connection_db
 
 import cx_Oracle
 import hashlib
-import os
 
 drivers = Blueprint('drivers', __name__)
 
@@ -52,8 +51,6 @@ def create_driver():
             'birthdate': birthdate,
         }
         
-        print(data)
-        
         cursor.execute("""
             INSERT INTO AVI_DRIVERS (CEDULE, ADDRESS, NAMES, SURNAMES, CITY, EMAIL, PHONE, PASSWORD, BIRTHDATE)
             VALUES (:cedule, :address, :names, :surnames, :city, :email, :phone, :password, :birthdate)
@@ -64,38 +61,6 @@ def create_driver():
         connection.close()
         
         return jsonify({ 'message': 'Conductor creado exitosamente' })
-    except cx_Oracle.DatabaseError as e:
-        error, = e.args
-        return jsonify({ 'error': True, 'message': error.message })
-    
-@drivers.route("/driver-documents", methods=["PUT"])
-def upload_documents():
-    try:
-        connection, cursor = connection_db()
-        
-        cedule_file = request.files.get('cedule')
-        registration_file = request.files.get('registration')
-        license_file = request.files.get('license')
-        cedule = request.form.get("cedule")
-       
-        if not cedule_file or not registration_file or not license_file:
-            return jsonify({ 'error': True, 'message': 'Todos los archivos son requeridos' })
-    
-        cedule_filename = secure_filename(f"{cedule}_cedule.pdf")
-        registration_filename = secure_filename(f"{cedule}_registration.pdf")
-        license_filename = secure_filename(f"{cedule}_license.pdf")
-        
-        cedule_file.save(os.path.join('documents', cedule_filename))
-        registration_file.save(os.path.join('documents', registration_filename))
-        license_file.save(os.path.join('documents', license_filename))
-        
-        cursor.execute(f"UPDATE AVI_DRIVERS SET DOCUMENTS = 1 WHERE CEDULE = {cedule}")
-        connection.commit()
-        
-        cursor.close()
-        connection.close()
-        
-        return jsonify({ 'error': False, 'message': 'Documentos ingresados correctamente. Le notificaremos a uno de nuestros administradores para que los verifique.' })
     except cx_Oracle.DatabaseError as e:
         error, = e.args
         return jsonify({ 'error': True, 'message': error.message })
@@ -113,7 +78,7 @@ def verificate_documents_driver():
         
         send_email(destination, body, subject)
         
-        cursor.execute(f"UPDATE AVI_DRIVERS SET VERIFIED_DOCUMENTS = {verified_documents} WHERE CEDULE = {cedule}")
+        cursor.execute(f"UPDATE AVI_DRIVERS SET STATE_DOCUMENTS = {verified_documents} WHERE CEDULE = {cedule}")
         connection.commit()
         
         cursor.close()

@@ -11,6 +11,11 @@ from routes.users import users
 from routes.security_alerts import security_alerts
 from routes.rate_drivers import rate_drivers
 from routes.completed_races import completed_races
+from routes.available_times import available_times
+from routes.routes import routes
+from routes.cancellation_route import cancellation_route
+from routes.reviews import reviews
+from routes.cars import cars
 
 import os
 
@@ -35,3 +40,8 @@ app.register_blueprint(users)
 app.register_blueprint(security_alerts)
 app.register_blueprint(rate_drivers)
 app.register_blueprint(completed_races)
+app.register_blueprint(available_times)
+app.register_blueprint(routes)
+app.register_blueprint(cancellation_route)
+app.register_blueprint(reviews)
+app.register_blueprint(cars)

@@ -25,7 +25,7 @@ def get_security_alerts():
         return jsonify({ 'error': True, 'message': error.message })
     
 @available_times.route("/available-times", methods=["POST"])
-def get_security_alerts():
+def create_available_time():
     try:
         connection, cursor = connection_db()
         

@@ -5,7 +5,6 @@ import smtplib
 def send_email(destination, body, subject):
     try:
         sender = 'josue.medinatest2810@gmail.com'
-        password = "wqqkbsfgcbgiodla"
         
         message = MIMEMultipart()
         message['From'] = sender
