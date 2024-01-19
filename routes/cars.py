@@ -26,7 +26,6 @@ def get_car(driver):
         cursor.execute(f"SELECT * FROM AVI_CARS WHERE DRIVER = {driver}")
         car_exist = cursor.fetchone()
         
-        
         if car_exist:
             result = format_obj(car_exist, cursor)
             
@@ -51,7 +50,7 @@ def upload_car():
         image = request.files['image']
         if image:
             image.save(f"./assets/cars/{request.form.get('cedule')}.png")
-            
+
         data = {
             'plate': request.form.get("plate"),
             'color': request.form.get("color"),

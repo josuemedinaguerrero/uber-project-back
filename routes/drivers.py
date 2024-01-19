@@ -87,3 +87,27 @@ def verificate_documents_driver():
     except cx_Oracle.DatabaseError as e:
         error, = e.args
         return jsonify({ 'error': True, 'message': error.message })
+
+@drivers.route('/change-status/<cedule>', methods=["PUT"])
+def change_status(cedule):
+    try:
+        connection, cursor = connection_db()
+        
+        cursor.execute(f"SELECT * FROM AVI_DRIVERS WHERE cedule = {cedule}")
+        driver_data = cursor.fetchone()
+        
+        new_status = 1 if driver_data[9] == 0 else 0
+        body = f"Su usuario ha sido {"bloqueado" if new_status == 0 else "desbloqueado"}"
+        
+        send_email(driver_data[5], body, "Estado del conductor")
+        
+        cursor.execute(f"UPDATE AVI_DRIVERS SET STATUS = {new_status} WHERE CEDULE = {cedule}")
+        connection.commit()
+        
+        cursor.close()
+        connection.close()
+            
+        return jsonify({ 'error': False, 'message': 'Estado actualizado correctamente' })
+    except cx_Oracle.DatabaseError as e:
+        error, = e.args
+        return jsonify({ 'error': True, 'message': error.message })

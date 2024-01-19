@@ -6,18 +6,18 @@ import random
 
 rate_drivers = Blueprint('rate_drivers', __name__)
 
-@rate_drivers.route("/rate-drivers/<cedule>")
+@rate_drivers.route("/rate-driver/<cedule>")
 def get_rate_drivers(cedule):
     try:
         connection, cursor = connection_db()
         
         cursor.execute(f"SELECT * FROM AVI_RATE_DRIVERS WHERE DRIVER = {cedule}")
-        available_times_db = cursor.fetchone()
+        rate_driver_db = cursor.fetchone()
         
         cursor.close()
         connection.close()
 
-        return jsonify({ 'data': available_times_db[0] })
+        return jsonify({ 'data': rate_driver_db[0] if rate_driver_db is not None else 10 })
     except cx_Oracle.DatabaseError as e:
         error, = e.args
         return jsonify({ 'error': True, 'message': error.message })

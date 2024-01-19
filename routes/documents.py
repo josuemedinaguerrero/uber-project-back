@@ -21,7 +21,7 @@ def upload_documents():
        
         if not cedule_file or not registration_file or not license_file:
             return jsonify({ 'error': True, 'message': 'Todos los archivos son requeridos' })
-    
+        
         cedule_filename = secure_filename(f"{cedule}_cedule.pdf")
         registration_filename = secure_filename(f"{cedule}_registration.pdf")
         license_filename = secure_filename(f"{cedule}_license.pdf")

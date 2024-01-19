@@ -15,6 +15,7 @@ from routes.available_times import available_times
 from routes.routes import routes
 from routes.cancellation_route import cancellation_route
 from routes.reviews import reviews
+from routes.featured_destinations import featured_destinations
 from routes.cars import cars
 
 import os
@@ -45,3 +46,4 @@ app.register_blueprint(routes)
 app.register_blueprint(cancellation_route)
 app.register_blueprint(reviews)
 app.register_blueprint(cars)
+app.register_blueprint(featured_destinations)

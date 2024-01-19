@@ -17,6 +17,7 @@ def register_user():
         }
         
         cursor.execute(f"SELECT * FROM AVI_DRIVERS WHERE cedule = {request.form.get("cedule")}")
+        
         driver_data = cursor.fetchone()
         
         result = None
@@ -60,7 +61,7 @@ def register_user():
                     'EMAIL': result[1],
                     'USERNAME': result[2],
                     'ROL_ID': result[3],
-                    'ROL': result[4]
+                    'ROL': result[4].strip()
                 }
                 return jsonify({ 'message': 'Inicio de sesión exitoso!', 'data': data })
             else:

@@ -16,12 +16,12 @@ def get_completed_races(cedule):
         
         cursor.close()
         connection.close()
-
-        return jsonify({ 'data': completed_races_db[1] })
+        
+        return jsonify({ 'error': False, 'data': completed_races_db[1] if completed_races_db is not None else 0 })
     except cx_Oracle.DatabaseError as e:
         error, = e.args
         return jsonify({ 'error': True, 'message': error.message })
-    
+
 @completed_races.route("/completed-races/<cedule>", methods=["PUT"])
 def update_rate_driver(cedule):
     try:

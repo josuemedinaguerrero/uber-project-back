@@ -1,9 +1,28 @@
 from flask import Blueprint, request, jsonify
+from helpers.format import format_fields
 from db.connection import connection_db
 
 import cx_Oracle
 
 users = Blueprint('users', __name__)
+
+@users.route("/users")
+def get_users():
+    try:
+        connection, cursor = connection_db()
+        
+        cursor.execute("SELECT u.CEDULE, u.EMAIL, u.USERNAME FROM AVI_USERS u WHERE ROL = 1")
+        available_times_db = cursor.fetchall()
+        
+        result = format_fields(available_times_db, cursor)
+        
+        cursor.close()
+        connection.close()
+
+        return jsonify(result)
+    except cx_Oracle.DatabaseError as e:
+        error, = e.args
+        return jsonify({ 'error': True, 'message': error.message })
 
 @users.route('/update-user', methods=["PUT"])
 def register_user():
